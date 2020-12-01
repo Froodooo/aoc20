@@ -30,8 +30,8 @@ class Day1:
 if __name__ == '__main__':
     day = Day1()
 
-    result_a = day.run_a('1.txt')
+    result_a = day.run_a('day1/1.txt')
     print(result_a)
 
-    result_b = day.run_b('1.txt')
+    result_b = day.run_b('day1/1.txt')
     print(result_b)
