@@ -1,6 +1,3 @@
-import itertools
-
-
 class Day2:
     def run_a(self, input_file):
         input = self.__read(input_file)
