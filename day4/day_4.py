@@ -1,36 +1,34 @@
 import re
 
+REQUIRED = ['byr', 'iyr', 'eyr', 'hgt', 'hcl', 'ecl', 'pid']
+EYE_COLORS = ['amb', 'blu', 'brn', 'gry', 'grn', 'hzl', 'oth']
 
 class Day4:
     def run_a(self, input_file):
         input = self.__read(input_file)
-        required = ['byr', 'iyr', 'eyr', 'hgt', 'hcl', 'ecl', 'pid']
-        validated_input = [self.__is_valid_a(
-            line, required.copy()) for line in input]
+
+        validated_input = [self.__is_valid(
+            line, REQUIRED.copy(), False) for line in input]
+            
         valid_passports = validated_input.count(True)
         return(valid_passports)
 
     def run_b(self, input_file):
         input = self.__read(input_file)
-        required = ['byr', 'iyr', 'eyr', 'hgt', 'hcl', 'ecl', 'pid']
-        validated_input = [self.__is_valid_b(
-            line, required.copy()) for line in input]
+        validated_input = [self.__is_valid(
+            line, REQUIRED.copy(), True) for line in input]
         valid_passports = validated_input.count(True)
         return(valid_passports)
 
-    def __is_valid_a(self, line, required):
-        for (field, _) in line:
-            if (field == 'cid'):
-                continue
-            required.remove(field)
-        return len(required) == 0
-
-    def __is_valid_b(self, line, required):
+    def __is_valid(self, line, required, check_fields):
         for (field, value) in line:
             if (field == 'cid'):
                 continue
-            is_valid_field = self.__is_valid_field(field, value)
-            if (is_valid_field):
+            if (check_fields):
+                is_valid_field = self.__is_valid_field(field, value)
+                if (is_valid_field):
+                    required.remove(field)
+            else:
                 required.remove(field)
         return len(required) == 0
 
@@ -53,11 +51,11 @@ class Day4:
             else:
                 return False
         elif (field == 'hcl'):
-            return re.match('#([0-9a-f]{6})', value)
+            return re.match(r'#([0-9a-f]{6})', value)
         elif (field == 'ecl'):
-            return value in ['amb', 'blu', 'brn', 'gry', 'grn', 'hzl', 'oth']
+            return value in EYE_COLORS
         elif (field == 'pid'):
-            return re.match('^0*[0-9]{9}$', value)
+            return re.match(r'^0*[0-9]{9}$', value)
         else:
             False
 
