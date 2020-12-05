@@ -1,11 +1,13 @@
 import unittest
 
 from day5.day_5 import Day5
+from day5.day_5_alt import Day5Alt
 
 
 class TestDay5(unittest.TestCase):
     def setUp(self):
         self.day = Day5()
+        self.day_alt = Day5Alt()
 
     def test_run_example_1(self):
         output = self.day.run_a('test/5_example_1.txt')
@@ -29,6 +31,14 @@ class TestDay5(unittest.TestCase):
     
     def test_run_b(self):
         output = self.day.run_b('day5/5.txt')
+        self.assertEqual(output, 619)
+    
+    def test_run_a_alt(self):
+        output = self.day_alt.run_a('day5/5.txt')
+        self.assertEqual(output, 908)
+    
+    def test_run_b_alt(self):
+        output = self.day_alt.run_b('day5/5.txt')
         self.assertEqual(output, 619)
 
 
