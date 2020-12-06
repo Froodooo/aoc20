@@ -1,3 +1,4 @@
+from functools import reduce
 import re
 
 ANY = 'ANY'
@@ -16,10 +17,7 @@ class Day6:
         return result
 
     def __count_groups(self, groups, count_type):
-        count = 0
-        for group in groups:
-            count += self.__count_group(group, count_type)
-        return count
+        return sum(map(lambda group: self.__count_group(group, count_type), groups))
 
     def __count_group(self, group, count_type):
         if count_type == ANY:
