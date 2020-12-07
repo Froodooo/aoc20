@@ -1,22 +1,22 @@
 import unittest
 
-from day7.day_7 import Day7
+import day7.day_7
 
 
 class TestDay7(unittest.TestCase):
-    def setUp(self):
-        self.day = Day7()
+    # def setUp(self):
+    #     self.day = day7.day_7
 
     def test_run_a_example_1(self):
-        output = self.day.run_a('test/7_example_1.txt')
+        output = day7.day_7.run_a('test/7_example_1.txt')
         self.assertEqual(output, 4)
-    
+
     def test_run_b_example_1(self):
-        output = self.day.run_b('test/7_example_1.txt')
+        output = day7.day_7.run_b('test/7_example_1.txt')
         self.assertEqual(output, 32)
 
     def test_run_b_example_2(self):
-        output = self.day.run_b('test/7_example_2.txt')
+        output = day7.day_7.run_b('test/7_example_2.txt')
         self.assertEqual(output, 126)
 
 
