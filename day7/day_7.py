@@ -1,6 +1,3 @@
-from functools import reduce
-
-
 class Bag:
     def __init__(self, amount, shade, color):
         self.amount = amount
