@@ -4,9 +4,6 @@ import day7.day_7
 
 
 class TestDay7(unittest.TestCase):
-    # def setUp(self):
-    #     self.day = day7.day_7
-
     def test_run_a_example_1(self):
         output = day7.day_7.run_a('test/7_example_1.txt')
         self.assertEqual(output, 4)
