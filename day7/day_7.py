@@ -19,8 +19,12 @@ def run_a(input_file):
     bag_to_find = Bag(1, 'shiny', 'gold')
 
     found_bags = 0
-    for contained_bags in bags.values():
-        if any([_find_bag(bag, bag_to_find, bags) for bag in contained_bags]):
+
+    for key in bags.keys():
+        if key == bag_to_find.key():
+            continue
+
+        if _find_bag(bags, key, bag_to_find):
             found_bags += 1
 
     return found_bags
@@ -33,13 +37,16 @@ def run_b(input_file):
     return _count_bags(start_bag, bags, 0)
 
 
-def _find_bag(bag, bag_to_find, bags):
-    if bag.equals(bag_to_find):
+def _find_bag(bags, key, bag_to_find):
+    if key == bag_to_find.key():
         return True
 
-    contained_bags = bags[bag.key()]
+    keys = [bag.key() for bag in bags[key]]
+    for key in keys:
+        if _find_bag(bags, key, bag_to_find):
+            return True
 
-    return any([_find_bag(bag, bag_to_find, bags) for bag in contained_bags])
+    return False
 
 
 def _count_bags(bag, bags, count):
