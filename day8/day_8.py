@@ -69,11 +69,13 @@ def _debug_game_console(input):
 def _read(file_name):
     with open(file_name) as f:
         input = [_read_line(line.rstrip()) for line in f]
+
     return input
 
 
 def _read_line(line):
     operation, argument = line.split()
+    
     return operation, int(argument)
 
 
