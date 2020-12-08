@@ -43,8 +43,12 @@ def run_a(input_file):
 
 def run_b(input_file):
     input = _read(input_file)
+
+    return _debug_game_console(input)
+
+
+def _debug_game_console(input):
     instruction_number = 0
-    valid_accumulator = 0
 
     while True:
         updated_input = _update_input(input.copy(), instruction_number)
@@ -52,12 +56,9 @@ def run_b(input_file):
         game_console.run()
 
         if game_console.is_finished():
-            valid_accumulator = game_console.get_accumulator()
-            break
-
-        instruction_number += 1
-
-    return valid_accumulator
+            return game_console.get_accumulator()
+        else:
+            instruction_number += 1
 
 
 def _read(file_name):
@@ -72,16 +73,21 @@ def _read_line(line):
 
 
 def _update_input(input, instruction_number):
-    index = [index for index, (operation, argument) in enumerate(
-        input) if operation in ['jmp', 'nop']][instruction_number]
+    index = [
+        index
+        for index, (operation, argument) in enumerate(input)
+        if operation in ['jmp', 'nop']
+    ][instruction_number]
+
     operation, argument = input[index]
+
     if operation == 'jmp':
         operation = 'nop'
     elif operation == 'nop':
         operation == 'jmp'
 
     input[index] = operation, argument
-    
+
     return input
 
 
