@@ -4,7 +4,7 @@ class GameConsole:
         self.accumulator = 0
         self.finished = False
         self.index = 0
-        self.visited = []
+        self.visited = set()
 
     def run(self):
         while self.index not in self.visited:
@@ -16,7 +16,7 @@ class GameConsole:
             self._run_instruction(operation, argument)
 
     def _run_instruction(self, operation, argument):
-        self.visited.append(self.index)
+        self.visited.add(self.index)
 
         if operation == 'acc':
             self.accumulator += argument
