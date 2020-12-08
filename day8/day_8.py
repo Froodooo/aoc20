@@ -35,16 +35,21 @@ class GameConsole:
 
 def run_a(input_file):
     input = _read(input_file)
-    game_console = GameConsole(input)
-    game_console.run()
 
-    return game_console.get_accumulator()
+    return _run_game_console(input)
 
 
 def run_b(input_file):
     input = _read(input_file)
 
     return _debug_game_console(input)
+
+
+def _run_game_console(input):
+    game_console = GameConsole(input)
+    game_console.run()
+
+    return game_console.get_accumulator()
 
 
 def _debug_game_console(input):
