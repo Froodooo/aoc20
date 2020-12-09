@@ -4,9 +4,6 @@ class Bag:
         self.shade = shade
         self.color = color
 
-    def equals(self, bag):
-        return self.shade == bag.shade and self.color == bag.color
-
     def key(self):
         return self.shade + '-' + self.color
 
