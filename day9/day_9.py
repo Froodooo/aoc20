@@ -1,4 +1,4 @@
-import itertools
+from itertools import combinations
 
 
 def run_a(input_file, preamble):
@@ -22,7 +22,7 @@ def _find_weakness(input, preamble):
 
 
 def _has_weakness(number, input):
-    for x, y in itertools.combinations(input, 2):
+    for x, y in combinations(input, 2):
         if x != y and x + y == number:
             return False
     return True
@@ -30,7 +30,7 @@ def _has_weakness(number, input):
 
 def _find_contiguous_set(input, weakness):
     total = 0
-    for index, _ in enumerate(input):
+    for index in range(len(input)):
         total = 0
         count = 0
         while(total < weakness):
