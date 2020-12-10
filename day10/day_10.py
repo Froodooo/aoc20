@@ -4,7 +4,24 @@ from functools import lru_cache
 
 def run_a(input_file):
     adapters = _read(input_file)
-    differences = _connect_adapters(adapters, 0, {})
+    differences = {}
+
+    def _connect_adapters(start):
+        if len(adapters) == 0:
+            differences[3] += 1
+            return differences
+
+        adapter = adapters.pop(0)
+        difference = adapter - start
+
+        if difference in differences:
+            differences[difference] += 1
+        else:
+            differences[difference] = 1
+
+        return _connect_adapters(adapter)
+
+    differences = _connect_adapters(0)
 
     return differences[1] * differences[3]
 
@@ -27,22 +44,6 @@ def run_b(input_file):
         return count
 
     return _count_configurations(0)
-
-
-def _connect_adapters(adapters, start, differences):
-    if len(adapters) == 0:
-        differences[3] += 1
-        return differences
-
-    adapter = adapters.pop(0)
-    difference = adapter - start
-
-    if difference in differences:
-        differences[difference] += 1
-    else:
-        differences[difference] = 1
-
-    return _connect_adapters(adapters, adapter, differences)
 
 
 def _read(file_name):
