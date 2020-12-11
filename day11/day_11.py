@@ -51,28 +51,6 @@ def _round(seats, options):
 
 
 def _adjacent_seats(row, col, seats, options):
-    if options['part'] == 'a':
-        adjacent_seats = _direct_ajacent_seats(
-            row, col, seats)
-    elif options['part'] == 'b':
-        adjacent_seats = _indirect_adjacent_seats(
-            row, col, seats)
-    return adjacent_seats
-
-
-def _direct_ajacent_seats(row, col, seats):
-    adjacent_seats = []
-    rows, cols = len(seats), len(seats[0])
-
-    for adjacent_row, adjacent_col in ADJACENTS:
-        if 0 <= row - adjacent_row < rows and 0 <= col - adjacent_col < cols:
-            adjacent_seats.append(
-                seats[row - adjacent_row][col - adjacent_col])
-
-    return adjacent_seats
-
-
-def _indirect_adjacent_seats(row, col, seats):
     adjacent_seats = []
     rows, cols = len(seats), len(seats[0])
 
@@ -80,15 +58,22 @@ def _indirect_adjacent_seats(row, col, seats):
         row_delta = row + adjacent_col
         col_delta = col + adjacent_row
 
-        while _seat_is_floor(row_delta, col_delta, seats):
-            row_delta += adjacent_col
-            col_delta += adjacent_row
+        if options['part'] == 'b':
+            row_delta, col_delta = _indirect_adjacent_seat_position(
+                row_delta, col_delta, adjacent_row, adjacent_col, seats)
 
         if 0 <= row_delta < rows and 0 <= col_delta < cols:
-            adjacent_seats.append(
-                seats[row_delta][col_delta])
+            adjacent_seats.append(seats[row_delta][col_delta])
 
     return adjacent_seats
+
+
+def _indirect_adjacent_seat_position(row, col, adjacent_row, adjacent_col, seats):
+    while _seat_is_floor(row, col, seats):
+        row += adjacent_col
+        col += adjacent_row
+
+    return row, col
 
 
 def _seat_is_floor(row, col, seats):
