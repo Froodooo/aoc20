@@ -1,15 +1,15 @@
 import unittest
 
-import day11.day_11_dirty
+import day11.day_11
 
 
 class TestDay10(unittest.TestCase):
     def test_run_a_example_1(self):
-        output = day11.day_11_dirty.run_a('test/11_example_1.txt')
+        output = day11.day_11.run_a('test/11_example_1.txt')
         self.assertEqual(output, 37)
     
     def test_run_b_example_1(self):
-        output = day11.day_11_dirty.run_b('test/11_example_1.txt')
+        output = day11.day_11.run_b('test/11_example_1.txt')
         self.assertEqual(output, 26)
 
 
