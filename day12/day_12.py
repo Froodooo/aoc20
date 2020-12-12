@@ -28,12 +28,11 @@ class Coordinate:
         sign = -1 if action == 'L' else 1
         radians = math.radians(sign * value)
 
-        xx = round(self.x * math.cos(radians) + self.y * math.sin(radians))
-        yy = round((-1 * self.x) * math.sin(radians) +
-                   self.y * math.cos(radians))
+        x = round(self.x * math.cos(radians) + self.y * math.sin(radians))
+        y = round(-self.x * math.sin(radians) + self.y * math.cos(radians))
 
-        self.x = xx
-        self.y = yy
+        self.x = x
+        self.y = y
 
     def manhattan(self):
         return abs(self.x) + abs(self.y)
@@ -57,7 +56,6 @@ def run_b(input_file):
 
 def _run(input_file, position, waypoint, options):
     directions = _read(input_file)
-
     position = _navigate(directions, waypoint, position, options)
 
     return position.manhattan()
@@ -67,13 +65,12 @@ def _navigate(directions, waypoint, position, options):
     if len(directions) == 0:
         return position
 
+    part = options['part']
     action, value = directions[0]
 
     if action in DIRECTIONS:
-        if options['part'] == 'a':
-            position.move(action, value)
-        else:
-            waypoint.move(action, value)
+        position.move(action, value) if part == 'a' else waypoint.move(
+            action, value)
     elif action in TURNS:
         waypoint.rotate(action, value)
     else:  # forward
@@ -84,16 +81,9 @@ def _navigate(directions, waypoint, position, options):
 
 def _read(file_name):
     with open(file_name) as f:
-        input = [_read_line(line) for line in f]
+        input = [[line[0], int(line[1:])] for line in f]
 
     return input
-
-
-def _read_line(line):
-    action = line[0]
-    value = int(line[1:])
-
-    return action, value
 
 
 def solve():
