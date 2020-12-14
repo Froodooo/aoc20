@@ -1,5 +1,5 @@
-import re
 import itertools
+import re
 
 
 def run_a(input_file):
@@ -28,10 +28,10 @@ def _execute_line(line, mask, memory, options):
         mask = _get_mask(line)
     else:
         position, value = _get_memory(line, mask)
-        if options['part'] == 'a':
-            memory = _set_memory(position, value, mask, memory)
-        elif options['part'] == 'b':
-            memory = _set_memory_v2(position, value, mask, memory)
+        part = options['part']
+
+        memory = _set_memory(position, value, mask, memory) if part == 'a' else _set_memory_v2(
+            position, value, mask, memory)
 
     return mask, memory
 
@@ -56,19 +56,18 @@ def _set_memory(position, value, mask, memory):
 
 
 def _set_memory_v2(position, value, mask, memory):
-    position = '{:036b}'.format(position)
-    result = [m if m != '0' else v for v, m in zip(position, mask)]
-    positions_of_X = [index for index, x in enumerate(result) if x == 'X']
+    addresses = [m if m != '0' else v for v,
+                 m in zip('{:036b}'.format(position), mask)]
+    positions_of_X = [index for index, x in enumerate(addresses) if x == 'X']
     number_of_X = len(positions_of_X)
-    size = pow(2, number_of_X)
 
-    for i in range(size):
-        bits_string = '{:0{size}b}'.format(i, size=number_of_X)
-        bits = list(bits_string)
-        address = result
-        for p, b in zip(positions_of_X, bits):
-            address[p] = b
-        address_string = ''.join([str(x) for x in address])
+    for index in range(2**number_of_X):
+        bits = list('{:0{size}b}'.format(index, size=number_of_X))
+
+        for position, bit in zip(positions_of_X, bits):
+            addresses[position] = bit
+
+        address_string = ''.join([str(x) for x in addresses])
         address_number = int(address_string, 2)
         memory[address_number] = value
 
