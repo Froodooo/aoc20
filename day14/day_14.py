@@ -44,40 +44,21 @@ def _get_memory(line, mask):
     position, value = re.match(r'mem\[(\d+)\] = (\d+)', line).groups()
     position, value = int(position), int(value)
     value = '{:036b}'.format(value)
+
     return position, value
 
 
 def _set_memory(position, value, mask, memory):
-    result = ['0'] * 36
-
-    i = 0
-    for v, m in zip(value, mask):
-        if m != 'X':
-            result[i] = m
-        else:
-            result[i] = v
-        i += 1
-
-    result = ''.join([str(x) for x in result])
-    memory[position] = result
+    memory[position] = ''.join(
+        [v if m == 'X' else m for v, m in zip(value, mask)])
 
     return memory
 
 
 def _set_memory_v2(position, value, mask, memory):
     position = '{:036b}'.format(position)
-    result = ['0'] * 36
-
-    i = 0
-    for v, m in zip(position, mask):
-        if m != '0':
-            result[i] = m
-        else:
-            result[i] = v
-        i += 1
-
-    result_string = ''.join([str(x) for x in result])
-    positions_of_X = [x.start() for x in list(re.finditer('X', result_string))]
+    result = [m if m != '0' else v for v, m in zip(position, mask)]
+    positions_of_X = [index for index, x in enumerate(result) if x == 'X']
     number_of_X = len(positions_of_X)
     size = pow(2, number_of_X)
 
