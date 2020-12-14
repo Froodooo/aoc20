@@ -36,9 +36,9 @@ class TestDay13(unittest.TestCase):
         output = day13.day_13.run_b('test/13_example_6.txt')
         self.assertEqual(output, 1202161486)
 
-    def test_run_b(self):
-        output = day13.day_13.run_b('day13/13.txt')
-        self.assertEqual(output, 894954360381385)
+    # def test_run_b(self):
+    #     output = day13.day_13.run_b('day13/13.txt')
+    #     self.assertEqual(output, 894954360381385)
 
 
 if __name__ == '__main__':
