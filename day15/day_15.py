@@ -1,49 +1,28 @@
-class Game:
-    def __init__(self, numbers):
-        self.previous = numbers[-1]
-        self.state = {}
-        self.turns = len(numbers)
-
-        for turn, number in enumerate(numbers[:-1]):
-            self.state[number] = [turn + 1]
-
-    def play(self):
-        self.turns += 1
-        
-        if self.previous in self.state:
-            numbers = self.state[self.previous]
-            numbers.append(self.turns - 1)
-            self.state[self.previous] = numbers
-            new_number = numbers[-1] - numbers[-2]
-            self.previous = new_number
-        else:
-            self.state[self.previous] = [self.turns - 1]
-            new_number = 0
-            self.previous = new_number
-
-    def get_turns(self):
-        return self.turns
-
-    def get_previous(self):
-        return self.previous
-
-
 def run_a(input_file):
-    input = _read(input_file)
-    game = Game(input)
-    while game.get_turns() < 2020:
-        game.play()
-
-    return game.get_previous()
+    return _run(input_file, 2020)
 
 
 def run_b(input_file):
-    input = _read(input_file)
-    game = Game(input)
-    while game.get_turns() < 30000000:
-        game.play()
+    return _run(input_file, 30000000)
 
-    return game.get_previous()
+
+def _run(input_file, max_turns):
+    numbers = _read(input_file)
+
+    state = {}
+    turns = len(numbers)
+    previous = numbers[-1]
+
+    for turn, number in enumerate(numbers[:-1]):
+        state[number] = turn + 1
+
+    while turns < max_turns:
+        new = turns - state[previous] if previous in state else 0
+        state[previous] = turns
+        turns += 1
+        previous = new
+
+    return previous
 
 
 def _read(file_name):
