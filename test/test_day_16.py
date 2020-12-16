@@ -8,10 +8,6 @@ class TestDay16(unittest.TestCase):
         output = day16.day_16.run_a('test/16_example_1.txt')
         self.assertEqual(output, 71)
 
-    def test_run_b_example_2(self):
-        output = day16.day_16.run_b('test/16_example_2.txt')
-        self.assertEqual(output, 0)
-
 
 if __name__ == '__main__':
     unittest.main()
