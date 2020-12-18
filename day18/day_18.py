@@ -1,6 +1,3 @@
-import re
-
-
 def run_a(input_file):
     options = {'part': 'a'}
     return _run(input_file, options)
@@ -13,24 +10,11 @@ def run_b(input_file):
 
 def _run(input_file, options):
     input = _read(input_file)
-
-    result = 0
-    for line in input:
-        result += _evaluate(line, options)
-
-    return result
+    return sum([_evaluate(line, options) for line in input])
 
 
 def _is_number(str):
-    try:
-        int(str)
-        return True
-    except ValueError:
-        return False
-
-
-def _is_name(str):
-    return re.match("\w+", str)
+    return str.isdigit()
 
 
 def _peek(stack):
@@ -45,7 +29,7 @@ def _apply_operator(operators, values):
 
 
 def _greater_precedence(op1, op2):
-    precedences = {'+': 1, '-': 1, '*': 0, '/': 0}
+    precedences = {'+': 1, '*': 0}
     return precedences[op1] > precedences[op2]
 
 
@@ -57,7 +41,7 @@ def _use_precedence(top, token, options):
         return _greater_precedence(top, token)
 
 
-# http: // www.martinbroadhurst.com/shunting-yard-algorithm-in-python.html
+# http://www.martinbroadhurst.com/shunting-yard-algorithm-in-python.html
 def _evaluate(tokens, options):
     values = []
     operators = []
