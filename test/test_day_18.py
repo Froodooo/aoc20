@@ -3,7 +3,7 @@ import unittest
 import day18.day_18
 
 
-class TestDay17(unittest.TestCase):
+class TestDay18(unittest.TestCase):
     def test_run_a_example_1(self):
         output = day18.day_18.run_a('test/18_example_1.txt')
         self.assertEqual(output, 71)
