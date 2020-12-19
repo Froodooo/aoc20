@@ -1,51 +1,44 @@
-import re
+from re import match, search
 
 
 def run_a(input_file):
-    options = {'part': 'a'}
     rules, lines = _read(input_file)
-    resolved = _resolve('0', rules, options)
-    resolved_regex = f'^{resolved}$'
 
-    result = 0
-    for line in lines:
-        if re.match(resolved_regex, line):
-            result += 1
+    resolved_rule_0 = _resolve('0', rules)
+    resolved_regex = f'^{resolved_rule_0}$'
 
-    return result
+    return sum([1 for line in lines if match(resolved_regex, line)])
 
 
 def run_b(input_file):
-    options = {'part': 'b'}
     rules, lines = _read(input_file)
-    resolved = _resolve('0', rules, options)
-    resolved_regex = f'^{resolved}$'
+
+    rules['8'] = '42 | 42 8'
+    rules['11'] = '42 31 | 42 11 31'
+
+    resolved_rule_42 = _resolve('42', rules)
+    resolved_rule_31 = _resolve('31', rules)
+    resolved_regex = f'^(?P<match_42>({resolved_rule_42})+)(?P<match_31>({resolved_rule_31})+)$'
 
     result = 0
     for line in lines:
-        if re.match(resolved_regex, line):
+        matches = search(resolved_regex, line)
+        if matches and len(matches.group('match_42')) > len(matches.group('match_31')):
             result += 1
 
     return result
 
 
-def _resolve(rule_number, rules, options):
-    if options['part'] == 'b':
-        if rule_number == '8':
-            return f'({_resolve("42", rules, options)})+'
-        elif rule_number == '11':
-            return '|'.join((_resolve_char('42', rules, options) * n) +
-                            (_resolve_char('31', rules, options) * n) for n in range(1, 20))
-
+def _resolve(rule_number, rules):
     rule = rules[rule_number]
-    return ''.join(_resolve_char(char, rules, options) for char in rule)
+    return ''.join(_resolve_char(char, rules) for char in rule)
 
 
-def _resolve_char(char, rules, options):
+def _resolve_char(char, rules):
     if char in 'ab|':
         return char
     else:
-        return f'({_resolve(char, rules, options)})'
+        return f'({_resolve(char, rules)})'
 
 
 def _read(file_name):
