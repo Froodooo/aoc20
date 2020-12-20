@@ -28,11 +28,11 @@ def _find_edge_tiles(tiles):
                     flipped_other_borders = _flip_borders(
                         rotated_other_borders, flip)
                     intersection = [
-                        (other_tile_id, border) for border in borders if border in flipped_other_borders]
+                        (other_tile_id) for border in borders if border in flipped_other_borders]
                     touching_edges += len(intersection)
             if touching_edges > 0:
-                edges.append((other_tile_id, flipped_other_borders))
-        tile_edges[tile_id] = {i: borders for (i, borders) in edges}
+                edges.append(other_tile_id)
+        tile_edges[tile_id] = edges
 
     return tile_edges
 
@@ -43,11 +43,10 @@ def _rotate_borders(borders, times):
     return borders[-times:] + borders[:-times]
 
 
-def _rotate_tile(tile, times):
-    for _ in range(times):
-        tile = list(zip(*tile[::-1]))
-
-    return tile
+# def _rotate_tile(tile, times):
+#     for _ in range(times):
+#         tile = list(zip(*tile[::-1]))
+#     return tile
 
 
 def _flip_borders(borders, orientation):
@@ -60,16 +59,16 @@ def _flip_borders(borders, orientation):
         return borders
 
 
-def _flip_tile(tile, orientation):
-    flipped_tile = deepcopy(tile)
-    if orientation == 'horizontal':
-        for i in range(len(tile) - 1):
-            flipped_tile[i].reverse()
-    elif orientation == 'vertical':
-        for i in range(len(tile) - 1):
-            flipped_tile[len(tile) - 1 - i] = tile[i]
+# def _flip_tile(tile, orientation):
+#     flipped_tile = deepcopy(tile)
+#     if orientation == 'horizontal':
+#         for i in range(len(tile) - 1):
+#             flipped_tile[i].reverse()
+#     elif orientation == 'vertical':
+#         for i in range(len(tile) - 1):
+#             flipped_tile[len(tile) - 1 - i] = tile[i]
 
-    return flipped_tile
+#     return flipped_tile
 
 
 def _get_tile_borders(tile):
