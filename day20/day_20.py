@@ -5,14 +5,44 @@ from operator import mul
 
 def run_a(input_file):
     tiles = _read(input_file)
-    tile_edges = _find_edge_tiles(tiles)
+    tile_neighbours = _find_edge_tiles(tiles)
     corner_tiles = [tile_id for tile_id,
-                    tile_matches in tile_edges.items() if len(tile_matches) == 2]
+                    tile_matches in tile_neighbours.items() if len(tile_matches) == 2]
     return reduce(mul, corner_tiles)
 
 
+def run_b(input_file):
+    tiles = _read(input_file)
+    tile_neighbours = _find_edge_tiles(tiles)
+    corner_tiles = [tile_id for tile_id,
+                    tile_matches in tile_neighbours.items() if len(tile_matches) == 2]
+    _create_image(tile_neighbours, corner_tiles)
+    return 0
+
+
+def _create_image(tile_neighbours, corner_tiles):
+    corner_tile_lists = {}
+
+    for corner_tile in corner_tiles:
+        seen = []
+        next_border_tiles = _next_border_tile(
+            tile_neighbours, corner_tile, seen)
+        seen += next_border_tiles
+        # for next_border_tile in next_border_tiles:
+
+        print(seen)
+
+
+def _next_border_tile(tile_neighbours, tile_id, seen):
+    return [neighbour_tile_id
+            for neighbour_tile_id, neighbour_tiles in tile_neighbours.items()
+            if tile_id in neighbour_tiles
+            and len(neighbour_tiles) == 3
+            and neighbour_tile_id not in seen]
+
+
 def _find_edge_tiles(tiles):
-    tile_edges = {}
+    tile_neighbours = {}
     for tile_id, tile in tiles.items():
         borders = _get_tile_borders(tile)
         edges = []
@@ -32,9 +62,9 @@ def _find_edge_tiles(tiles):
                     touching_edges += len(intersection)
             if touching_edges > 0:
                 edges.append(other_tile_id)
-        tile_edges[tile_id] = edges
+        tile_neighbours[tile_id] = edges
 
-    return tile_edges
+    return tile_neighbours
 
 
 def _rotate_borders(borders, times):
@@ -101,11 +131,11 @@ def _read_tile(tile, tiles):
 def solve():
     input_file = 'day20/20.txt'
 
-    result_a = run_a(input_file)
-    print(result_a)
+    # result_a = run_a(input_file)
+    # print(result_a)
 
-    # result_b = run_b(input_file)
-    # print(result_b)
+    result_b = run_b(input_file)
+    print(result_b)
 
 
 if __name__ == '__main__':
