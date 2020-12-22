@@ -5,14 +5,14 @@ from operator import itemgetter
 def run_a(input_file):
     options = {'part': 'a'}
     players = _read(input_file)
-    winner = _play_game(players, 0, {}, options)
+    winner = _play_game(players, 0, set(), options)
     return _winning_score(players, winner)
 
 
 def run_b(input_file):
     options = {'part': 'b'}
     players = _read(input_file)
-    winner = _play_game(players, 0, {}, options)
+    winner = _play_game(players, 0, set(), options)
     return _winning_score(players, winner)
 
 
@@ -31,14 +31,15 @@ def _play_round(players, round, rounds, options):
 
     if part == 'b' and _is_infinite_game(players, rounds):
         return True, 1
-    _save_round(round - 1, rounds, players)
+
+    _save_round(rounds, players)
 
     cards_on_top = [(player_id, cards.pop(0))
                     for player_id, cards in players.items()]
 
     if part == 'b' and _is_recursive_game(dict(cards_on_top), players):
         players_copy = _players_copy(players, dict(cards_on_top))
-        winner = _play_game(players_copy, 0, {}, options)
+        winner = _play_game(players_copy, 0, set(), options)
     else:
         winner, _ = sorted(cards_on_top, key=lambda x: x[1], reverse=True)[0]
 
@@ -75,18 +76,16 @@ def _is_recursive_game(cards_on_top, players):
 
 
 def _is_infinite_game(players, rounds):
-    number_of_same_decks = 0
-
-    for players_in_round in rounds.values():
-        for player_id, cards in players.items():
-            if cards == players_in_round[player_id]:
-                number_of_same_decks += 1
-
-    return number_of_same_decks == len(players)
+    return players.values() in rounds
 
 
-def _save_round(round, rounds, players):
-    rounds[round] = deepcopy(players)
+def _save_round(rounds, players):
+    cards_in_round = []
+    for cards in players.values():
+        cards_tuple = tuple(cards)
+        cards_in_round.append(cards_tuple)
+
+    rounds.add(tuple(cards_in_round))
 
 
 def _is_finished(players):
