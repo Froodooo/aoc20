@@ -1,45 +1,44 @@
 from copy import deepcopy
-from operator import itemgetter
 
 
 def run_a(input_file):
     options = {'part': 'a'}
     players = _read(input_file)
-    winner = _play_game(players, 0, set(), options)
+    winner = _play_game(players, options)
     return _winning_score(players, winner)
 
 
 def run_b(input_file):
     options = {'part': 'b'}
     players = _read(input_file)
-    winner = _play_game(players, 0, set(), options)
+    winner = _play_game(players, options)
     return _winning_score(players, winner)
 
 
-def _play_game(players, round, rounds, options):
+def _play_game(players, options):
     finished = False
+    rounds = []
 
     while not finished:
-        round += 1
-        finished, winner = _play_round(players, round, rounds, options)
+        finished, winner = _play_round(players, rounds, options)
 
     return winner
 
 
-def _play_round(players, round, rounds, options):
+def _play_round(players, rounds, options):
     part = options['part']
 
     if part == 'b' and _is_infinite_game(players, rounds):
         return True, 1
-
-    _save_round(rounds, players)
+    else:
+        rounds.append(tuple(deepcopy(players).values()))
 
     cards_on_top = [(player_id, cards.pop(0))
                     for player_id, cards in players.items()]
 
     if part == 'b' and _is_recursive_game(dict(cards_on_top), players):
-        players_copy = _players_copy(players, dict(cards_on_top))
-        winner = _play_game(players_copy, 0, set(), options)
+        players_copy = _players_copy(deepcopy(players), dict(cards_on_top))
+        winner = _play_game(players_copy, options)
     else:
         winner, _ = sorted(cards_on_top, key=lambda x: x[1], reverse=True)[0]
 
@@ -62,11 +61,8 @@ def _sort_cards_on_top(cards_on_top, winner, part):
 
 
 def _players_copy(players, cards_on_top):
-    players_copy = deepcopy(players)
-    players_copy = {player_id: cards[:cards_on_top[player_id]]
-                    for player_id, cards in players_copy.items()}
-
-    return players_copy
+    return {player_id: cards[:cards_on_top[player_id]]
+            for player_id, cards in players.items()}
 
 
 def _is_recursive_game(cards_on_top, players):
@@ -76,16 +72,7 @@ def _is_recursive_game(cards_on_top, players):
 
 
 def _is_infinite_game(players, rounds):
-    return players.values() in rounds
-
-
-def _save_round(rounds, players):
-    cards_in_round = []
-    for cards in players.values():
-        cards_tuple = tuple(cards)
-        cards_in_round.append(cards_tuple)
-
-    rounds.add(tuple(cards_in_round))
+    return tuple(players.values()) in rounds
 
 
 def _is_finished(players):
