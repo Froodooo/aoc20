@@ -1,102 +1,70 @@
-from operator import mul
-from functools import reduce
+class Cup:
+    def __init__(self, label):
+        self.label = label
+        self.next = None
 
 
 def run_a(input_file, moves):
-    numbers = _read(input_file)
-    options = {'next': 3}
-    numbers = _play_game(numbers, moves, options)
-    collected_numbers = _collect_numbers(numbers, 1)
+    labels = _read(input_file)
+    cups = [Cup(label) for label in labels]
+    for i in range(len(cups)):
+        cups[i].next = cups[(i + 1) % len(cups)]
 
-    return ''.join("{0}".format(n) for n in collected_numbers)
+    current = _play(cups, labels, moves)
+    cup_1 = _find(current, 1)
+    next_cup = cup_1.next
+    output = []
+    for _ in range(len(cups) - 1):
+        output.append(str(next_cup.label))
+        next_cup = next_cup.next
 
-
-def run_b(input_file, moves):
-    numbers = _read(input_file)
-    numbers = _pad_until(numbers, 1000000)
-    options = {'next': 3}
-    numbers = _play_game(numbers, moves, options)
-    collected_numbers = _collect_next_numbers_after(numbers, 1, 2)
-
-    return reduce(mul, collected_numbers)
+    return ''.join(output)
 
 
-def _pad_until(numbers, until):
-    return numbers + [i for i in range(max(numbers) + 1, until + 1)]
+def _play(cubs, labels, moves):
+    min_label = min(labels)
+    max_label = max(labels)
+    current = cubs[0]
 
-
-def _collect_next_numbers_after(numbers, after, amount):
-    collected_numbers = []
-    after_index = numbers.index(after)
-    for i in range(1, amount + 1):
-        collected_numbers.append(numbers[(after_index + i) % len(numbers)])
-
-    return collected_numbers
-
-
-def _collect_numbers(numbers, from_cup):
-    from_cup_index = numbers.index(from_cup)
-    collected_numbers = []
-
-    for i in range(1, len(numbers)):
-        collected_numbers.append(numbers[(from_cup_index + i) % len(numbers)])
-
-    return collected_numbers
-
-
-def _play_game(numbers, moves, options):
-    current_cup = numbers[0]
-    next = options['next']
-
-    for move in range(moves):
-        # print(f'-- move {move + 1} --')
-
-        numbers = _adjust_spacing(numbers, current_cup, move)
-        current_cup_index = numbers.index(current_cup)
-        next_cup = numbers[(current_cup_index + next + 1) % len(numbers)]
-
-        # print('cups:', numbers)
-        # print('current:', current_cup)
-
+    for _ in range(moves):
         picked_up = []
-        for i in range(1, next + 1):
-            index = (current_cup_index + i) % len(numbers)
-            picked_up.append(numbers[index])
-        for cup in picked_up:
-            numbers.remove(cup)
-        # print('pick up:', picked_up)
+        picked_up_labels = []
 
-        destination_cup = current_cup
-        while destination_cup in picked_up or destination_cup == current_cup:
-            destination_cup -= 1
-            if destination_cup < min(numbers):
-                destination_cup = max(numbers)
-                break
-        # print('destination:', destination_cup)
-        destination_cup_index = numbers.index(destination_cup)
+        next_pick = current
+        for _ in range(3):
+            picked_up.append(next_pick.next)
+            picked_up_labels.append(next_pick.next.label)
+            next_pick = next_pick.next
 
-        for i in range(1, next + 1):
-            numbers.insert(destination_cup_index + i, picked_up[i - 1])
+        current.next = next_pick.next
 
-        current_cup = next_cup
+        destination_label = current.label - 1
+        if destination_label < min_label:
+            destination_label = max_label
+        while destination_label in picked_up_labels:
+            destination_label -= 1
+            if destination_label < min_label:
+                destination_label = max_label
 
-    return numbers
+        destination = _find(current, destination_label)
+        picked_up[-1].next = destination.next
+        destination.next = picked_up[0]
+        current = current.next
+
+    return current
 
 
-def _adjust_spacing(numbers, current_cup, move):
-    collected_numbers = _collect_numbers(numbers, current_cup)
-    collected_numbers = collected_numbers[-(move % len(
-        numbers)):] + collected_numbers[:-(move % len(numbers))]
-    collected_numbers.insert((move % len(numbers)), current_cup)
-    
-    return collected_numbers
+def _find(cup, label):
+    while (cup.label != label):
+        cup = cup.next
+    return cup
 
 
 def _read(file_name):
     with open(file_name) as f:
-        input = [int(number) for number in f.readline()]
+        labels = [int(label) for label in f.readline()]
 
-    return input
+    return labels
 
 
 def solve():
