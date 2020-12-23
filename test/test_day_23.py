@@ -17,7 +17,7 @@ class TestDay23(unittest.TestCase):
         self.assertEqual(output, '24987653')
     
     # def test_run_b_example_1(self):
-    #     output = day23.day_23.run_b('test/23_example_1.txt', 10)
+    #     output = day23.day_23.run_b('test/23_example_1.txt', 10000000)
     #     self.assertEqual(output, 149245887792)
 
 
