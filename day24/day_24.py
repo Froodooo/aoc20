@@ -1,3 +1,5 @@
+# Using cube coordinates
+# https://www.redblobgames.com/grids/hexagons/#coordinates
 COORDINATES = [(1, -1, 0), (0, -1, 1), (-1, 0, 1),
                (-1, 1, 0), (0, 1, -1), (1, 0, -1)]
 
