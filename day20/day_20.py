@@ -16,21 +16,166 @@ def run_b(input_file):
     tile_neighbours = _find_edge_tiles(tiles)
     corner_tiles = [tile_id for tile_id,
                     tile_matches in tile_neighbours.items() if len(tile_matches) == 2]
-    _create_image(tile_neighbours, corner_tiles)
-    return 0
+    tiles_image = _create_tiles_image(tile_neighbours, corner_tiles)
+    image = _create_image(tiles_image, tiles)
+    image = _create_borderless_image(image)
+    image = _create_gapless_image(image)
+    monsters = _find_monsters(image)
+
+    return monsters
 
 
-def _create_image(tile_neighbours, corner_tiles):
-    corner_tile_lists = {}
+def _find_monsters(image):
+    monsters = 0
+    # for i, row in enumerate(image):
+    #     for j, char in enumerate(row):
+    #         if char == '#' and j + 15 <= len(row):
+    #             for k in range(j, j + 15):
+    
+    return monsters
 
-    for corner_tile in corner_tiles:
+
+def _create_gapless_image(image):
+    result_rows = [[None] * (len(image[0]) * len(image[0][0]))
+                   for _ in range(len(image[0]) * len(image[0][0]))]
+    
+
+    for i, row in enumerate(image):
+        for j, tile in enumerate(row):
+            for k, tile_row in enumerate(tile):
+                for l, char in enumerate(tile_row):
+                    row = i * len(tile_row) + k
+                    col = j * len(tile_row) + l
+                    result_rows[row][col] = char
+
+    return result_rows
+
+
+def _create_borderless_image(image):
+    for i, row in enumerate(image):
+        for j, tile in enumerate(row):
+            tile = tile[1:len(tile) - 1]
+            image[i][j] = tile
+            for k, tile_row in enumerate(tile):
+                tile_row = tile_row[1:len(tile_row) - 1]
+                image[i][j][k] = tile_row
+
+    return image
+
+
+def _create_image(tiles_image, tiles):
+    image = []
+    for tiles_image_row in tiles_image:
+        image_row = []
         seen = []
-        next_border_tiles = _next_border_tile(
-            tile_neighbours, corner_tile, seen)
-        seen += next_border_tiles
-        # for next_border_tile in next_border_tiles:
+        for i in range(len(tiles_image_row) - 1):
+            (rotate_1, flip_1, rotate_2, flip_2) = _flip_two_tiles(
+                tiles[tiles_image_row[i]], tiles[tiles_image_row[i+1]])
+            tile_1 = _rotate_tile(tiles[tiles_image_row[i]], rotate_1)
+            tile_2 = _rotate_tile(tiles[tiles_image_row[i+1]], rotate_2)
+            tile_1 = _flip_tile(tile_1, flip_1)
+            tile_2 = _flip_tile(tile_2, flip_2)
 
-        print(seen)
+            if tiles_image_row[i] not in seen:
+                image_row.append(tile_1)
+                seen.append(tiles_image_row[i])
+            if tiles_image_row[i+1] not in seen:
+                image_row.append(tile_2)
+                seen.append(tiles_image_row[i + 1])
+
+        image.append(image_row)
+
+    return image
+
+
+def _create_tiles_image(tile_neighbours, corner_tiles):
+    used_tiles = []
+
+    image = []
+    first_row = _create_first_row(
+        corner_tiles[0], tile_neighbours, corner_tiles)
+    image.append(first_row)
+    used_tiles = used_tiles + first_row
+
+    continue_create_image = True
+    next_row = [None]
+    last_row_corner_tile = None
+    while continue_create_image:
+        next_row = _create_next_row(first_row, tile_neighbours)
+        image.append(next_row)
+        used_tiles = used_tiles + next_row
+        for corner_tile in corner_tiles:
+            if corner_tile in tile_neighbours[next_row[0]] and corner_tile not in used_tiles:
+                last_row_corner_tile = corner_tile
+                continue_create_image = False
+                break
+
+    last_row = _create_last_row(
+        last_row_corner_tile, tile_neighbours, corner_tiles, used_tiles)
+    image.append(last_row)
+    return image
+
+
+def _create_next_row(previous_row, tile_neighbours):
+    left_edge_tile = _get_edge_tile(
+        previous_row, tile_neighbours[previous_row[0]], tile_neighbours)
+    right_edge_tile = _get_edge_tile(
+        previous_row, tile_neighbours[previous_row[-1]], tile_neighbours)
+
+    next_row = [left_edge_tile]
+    previous_tile = left_edge_tile
+    next_tile = None
+    while next_tile not in tile_neighbours[right_edge_tile]:
+        for possible_next_tile, neighbours in tile_neighbours.items():
+            if previous_tile in neighbours and len(tile_neighbours[possible_next_tile]) == 4:
+                next_tile = possible_next_tile
+                next_row.append(next_tile)
+                break
+    next_row.append(right_edge_tile)
+
+    return next_row
+
+
+def _get_edge_tile(previous_row, possible_edge_tiles, tile_neighbours):
+    edge_tile = None
+    for possible_edge_tile in possible_edge_tiles:
+        if possible_edge_tile not in previous_row and len(tile_neighbours[possible_edge_tile]) == 3:
+            edge_tile = possible_edge_tile
+            break
+
+    return edge_tile
+
+
+def _create_first_row(first_tile, tile_neighbours, corner_tiles):
+    first_row = [first_tile]
+    next_tile = None
+
+    while next_tile not in corner_tiles:
+        possible_next_tiles = tile_neighbours[first_row[-1]]
+        for possible_next_tile in possible_next_tiles:
+            if len(tile_neighbours[possible_next_tile]) not in [2, 3] or possible_next_tile == corner_tiles[0]:
+                continue
+            next_tile = possible_next_tile
+            first_row.append(next_tile)
+            break
+
+    return first_row
+
+
+def _create_last_row(first_tile, tile_neighbours, corner_tiles, used_tiles):
+    last_row = [first_tile]
+    next_tile = None
+
+    while next_tile not in corner_tiles:
+        possible_next_tiles = tile_neighbours[last_row[-1]]
+        for possible_next_tile in possible_next_tiles:
+            if len(tile_neighbours[possible_next_tile]) not in [2, 3] or possible_next_tile == first_tile or possible_next_tile in used_tiles:
+                continue
+            next_tile = possible_next_tile
+            last_row.append(next_tile)
+            break
+
+    return last_row
 
 
 def _next_border_tile(tile_neighbours, tile_id, seen):
@@ -67,16 +212,40 @@ def _find_edge_tiles(tiles):
     return tile_neighbours
 
 
+def _flip_two_tiles(tile_one, tile_two):
+    tile_one_borders = _get_tile_borders(tile_one)
+    tile_two_borders = _get_tile_borders(tile_two)
+
+    for rotation_1 in range(0, 4):
+        rotated_tile_one_borders = _rotate_borders(
+            tile_one_borders, rotation_1)
+        for flip_1 in ['horizontal', 'vertical', 'none']:
+            flipped_tile_one_borders = _flip_borders(
+                rotated_tile_one_borders, flip_1)
+            for rotation_2 in range(0, 4):
+                rotated_tile_two_borders = _rotate_borders(
+                    tile_two_borders, rotation_2)
+                for flip_2 in ['horizontal', 'vertical', 'none']:
+                    flipped_tile_two_borders = _flip_borders(
+                        rotated_tile_two_borders, flip_2)
+
+                    if flipped_tile_one_borders[1] == flipped_tile_two_borders[3]:
+                        return (rotation_1, flip_1, rotation_2, flip_2)
+
+
 def _rotate_borders(borders, times):
     if times == 0:
         return borders
     return borders[-times:] + borders[:-times]
 
 
-# def _rotate_tile(tile, times):
-#     for _ in range(times):
-#         tile = list(zip(*tile[::-1]))
-#     return tile
+def _rotate_tile(tile, times):
+    for _ in range(times):
+        tile = list(zip(*tile[::-1]))
+    for i in range(len(tile) - 1):
+        tile[i] = list(tile[i])
+
+    return tile
 
 
 def _flip_borders(borders, orientation):
@@ -89,16 +258,15 @@ def _flip_borders(borders, orientation):
         return borders
 
 
-# def _flip_tile(tile, orientation):
-#     flipped_tile = deepcopy(tile)
-#     if orientation == 'horizontal':
-#         for i in range(len(tile) - 1):
-#             flipped_tile[i].reverse()
-#     elif orientation == 'vertical':
-#         for i in range(len(tile) - 1):
-#             flipped_tile[len(tile) - 1 - i] = tile[i]
+def _flip_tile(tile, orientation):
+    flipped_tile = deepcopy(tile)
+    if orientation == 'horizontal':
+        for i in range(len(tile) - 1):
+            flipped_tile[i].reverse()
+    elif orientation == 'vertical':
+        return list(reversed(tile))
 
-#     return flipped_tile
+    return flipped_tile
 
 
 def _get_tile_borders(tile):
