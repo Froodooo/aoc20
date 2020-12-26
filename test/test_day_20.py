@@ -10,7 +10,7 @@ class TestDay20(unittest.TestCase):
     
     def test_run_b_example_1(self):
         output = day20.day_20.run_b('test/20_example_1.txt')
-        self.assertEqual(output, 0)
+        self.assertEqual(output, 273)
 
 
 if __name__ == '__main__':

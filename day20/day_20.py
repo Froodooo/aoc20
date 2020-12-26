@@ -13,32 +13,80 @@ def run_a(input_file):
 
 def run_b(input_file):
     tiles = _read(input_file)
+    print('Finding tile neighbours')
     tile_neighbours = _find_edge_tiles(tiles)
     corner_tiles = [tile_id for tile_id,
                     tile_matches in tile_neighbours.items() if len(tile_matches) == 2]
+    print('Creating tiles image')
     tiles_image = _create_tiles_image(tile_neighbours, corner_tiles)
+    print('Creating image')
     image = _create_image(tiles_image, tiles)
+    print('Creating borderless image')
     image = _create_borderless_image(image)
+    print('Creating gapless image')
     image = _create_gapless_image(image)
+    print(image)
+    print('Finding monsters')
     monsters = _find_monsters(image)
+    print(f'Found {monsters} monsters')
+    monster_spaces = 15 * monsters
+    all_spaces = _get_all_spaces(image)
 
-    return monsters
+    return all_spaces - monster_spaces
+
+
+def _get_all_spaces(image):
+    spaces = 0
+    for row in image:
+        for char in row:
+            if char == '#':
+                spaces += 1
+
+    return spaces
 
 
 def _find_monsters(image):
-    monsters = 0
-    # for i, row in enumerate(image):
-    #     for j, char in enumerate(row):
-    #         if char == '#' and j + 15 <= len(row):
-    #             for k in range(j, j + 15):
-    
-    return monsters
+    for rotation in range(0, 4):
+        rotated_image = _rotate_tile(image, rotation)
+        for flip in ['horizontal', 'vertical', 'none']:
+            flipped_image = _flip_tile(rotated_image, flip)
+            monsters = 0
+            for i in range(len(flipped_image) - 1):
+                previous_row = flipped_image[i-1]
+                row = flipped_image[i]
+                next_row = flipped_image[i+1]
+                for j in range(len(row) - 20):
+                    if _contains_monster_middle(row[j:]) and _contains_monster_top(previous_row[j:]) and _contains_monster_bottom(next_row[j:]):
+                        monsters += 1
+
+            if monsters > 0:
+                return monsters
+
+
+def _contains_monster_middle(row_next):
+    positions = [0, 5, 6, 11, 12, 17, 18, 19]
+    for position in positions:
+        if row_next[position] != '#':
+            return False
+    return True
+
+
+def _contains_monster_top(row_next):
+    result = row_next[18] == '#'
+    return result
+
+
+def _contains_monster_bottom(row_next):
+    positions = [1, 4, 7, 10, 13, 16]
+    for position in positions:
+        if row_next[position] != '#':
+            return False
+    return True
 
 
 def _create_gapless_image(image):
     result_rows = [[None] * (len(image[0]) * len(image[0][0]))
                    for _ in range(len(image[0]) * len(image[0][0]))]
-    
 
     for i, row in enumerate(image):
         for j, tile in enumerate(row):
@@ -92,6 +140,7 @@ def _create_tiles_image(tile_neighbours, corner_tiles):
     used_tiles = []
 
     image = []
+    print('Creating first row')
     first_row = _create_first_row(
         corner_tiles[0], tile_neighbours, corner_tiles)
     image.append(first_row)
@@ -100,46 +149,55 @@ def _create_tiles_image(tile_neighbours, corner_tiles):
     continue_create_image = True
     next_row = [None]
     last_row_corner_tile = None
+    previous_row = first_row
     while continue_create_image:
-        next_row = _create_next_row(first_row, tile_neighbours)
+        print('Creating next row')
+        next_row = _create_next_row(previous_row, tile_neighbours, used_tiles)
         image.append(next_row)
         used_tiles = used_tiles + next_row
+        previous_row = next_row
+
         for corner_tile in corner_tiles:
-            if corner_tile in tile_neighbours[next_row[0]] and corner_tile not in used_tiles:
+            if corner_tile in tile_neighbours[previous_row[0]] and corner_tile not in used_tiles:
                 last_row_corner_tile = corner_tile
                 continue_create_image = False
                 break
 
+    print('Creating last row')
     last_row = _create_last_row(
         last_row_corner_tile, tile_neighbours, corner_tiles, used_tiles)
     image.append(last_row)
     return image
 
 
-def _create_next_row(previous_row, tile_neighbours):
+def _create_next_row(previous_row, tile_neighbours, used_tiles):
     left_edge_tile = _get_edge_tile(
-        previous_row, tile_neighbours[previous_row[0]], tile_neighbours)
+        previous_row, tile_neighbours[previous_row[0]], tile_neighbours, used_tiles)
     right_edge_tile = _get_edge_tile(
-        previous_row, tile_neighbours[previous_row[-1]], tile_neighbours)
+        previous_row, tile_neighbours[previous_row[-1]], tile_neighbours, used_tiles)
 
     next_row = [left_edge_tile]
     previous_tile = left_edge_tile
     next_tile = None
+    position = 1
     while next_tile not in tile_neighbours[right_edge_tile]:
         for possible_next_tile, neighbours in tile_neighbours.items():
-            if previous_tile in neighbours and len(tile_neighbours[possible_next_tile]) == 4:
+            if previous_tile in neighbours and possible_next_tile in tile_neighbours[previous_row[position]] and len(neighbours) == 4 and possible_next_tile not in next_row and possible_next_tile not in used_tiles:
                 next_tile = possible_next_tile
                 next_row.append(next_tile)
+                previous_tile = next_tile
+                position += 1
                 break
+
     next_row.append(right_edge_tile)
 
     return next_row
 
 
-def _get_edge_tile(previous_row, possible_edge_tiles, tile_neighbours):
+def _get_edge_tile(previous_row, possible_edge_tiles, tile_neighbours, used_tiles):
     edge_tile = None
     for possible_edge_tile in possible_edge_tiles:
-        if possible_edge_tile not in previous_row and len(tile_neighbours[possible_edge_tile]) == 3:
+        if possible_edge_tile not in previous_row and len(tile_neighbours[possible_edge_tile]) == 3 and possible_edge_tile not in used_tiles:
             edge_tile = possible_edge_tile
             break
 
@@ -153,7 +211,7 @@ def _create_first_row(first_tile, tile_neighbours, corner_tiles):
     while next_tile not in corner_tiles:
         possible_next_tiles = tile_neighbours[first_row[-1]]
         for possible_next_tile in possible_next_tiles:
-            if len(tile_neighbours[possible_next_tile]) not in [2, 3] or possible_next_tile == corner_tiles[0]:
+            if len(tile_neighbours[possible_next_tile]) not in [2, 3] or possible_next_tile == corner_tiles[0] or possible_next_tile in first_row:
                 continue
             next_tile = possible_next_tile
             first_row.append(next_tile)
@@ -169,7 +227,7 @@ def _create_last_row(first_tile, tile_neighbours, corner_tiles, used_tiles):
     while next_tile not in corner_tiles:
         possible_next_tiles = tile_neighbours[last_row[-1]]
         for possible_next_tile in possible_next_tiles:
-            if len(tile_neighbours[possible_next_tile]) not in [2, 3] or possible_next_tile == first_tile or possible_next_tile in used_tiles:
+            if len(tile_neighbours[possible_next_tile]) not in [2, 3] or possible_next_tile == first_tile or possible_next_tile in last_row or possible_next_tile in used_tiles:
                 continue
             next_tile = possible_next_tile
             last_row.append(next_tile)
@@ -299,8 +357,8 @@ def _read_tile(tile, tiles):
 def solve():
     input_file = 'day20/20.txt'
 
-    # result_a = run_a(input_file)
-    # print(result_a)
+    result_a = run_a(input_file)
+    print(result_a)
 
     result_b = run_b(input_file)
     print(result_b)
